@@ -54,12 +54,9 @@ public class MethodModifier {
 			String evoMthd = classNode.name.replace("/", ".") + "." + mn.name + mn.desc;
 			if (evoErM.equals(evoMthd)) {
 				findMthd2modify = true;
-				ExeLabelPaths paths = getAllExePath(mn);
-				// remaining path
-				List<LabelNode> callLabels = getCallLabels(mn, MthdFormatUtil.soot2evo(eeM));
-				ExeLabelPath remianPath = paths.getRemainPath(callLabels);
+				
 				// filter node
-				deleteBranch(mn, remianPath);
+				deleteBranch(mn);
 				mn.tryCatchBlocks = null;
 			}
 		}
@@ -98,7 +95,10 @@ public class MethodModifier {
 		return path;
 	}
 
-	private void deleteBranch(MethodNode mn, ExeLabelPath remianPath) {
+	private void deleteBranch(MethodNode mn) throws Exception {
+		// TODO remaining path
+//		ExeLabelPath remianPath = getAllExePath(mn).getRemainPath(getCallLabels(mn, MthdFormatUtil.soot2evo(eeM)));
+		
 		ListIterator<AbstractInsnNode> ite = mn.instructions.iterator();
 		LabelNode currentLabel = null;
 		Set<AbstractInsnNode> remainLabels = new HashSet<AbstractInsnNode>();
