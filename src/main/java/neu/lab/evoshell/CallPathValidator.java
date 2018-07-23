@@ -74,7 +74,6 @@ public class CallPathValidator {
 	}
 
 	private void cmpResult(int result, Exception resultException) {
-		// TODO Auto-generated method stub
 		try {
 			PrintWriter printer = new PrintWriter(new BufferedWriter(new FileWriter(ShellConfig.cmpResult, true)));
 			printer.println(evoCmd);

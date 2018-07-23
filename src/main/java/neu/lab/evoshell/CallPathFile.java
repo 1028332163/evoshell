@@ -9,7 +9,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class CallPaths {
+public class CallPathFile {
 
 	private static int exePath4riskMthd = 2;//callPath handled for per riskMethod.
 	private String classPath;
@@ -18,7 +18,7 @@ public class CallPaths {
 	private List<String> mthdSeq;
 	private Map<String, LinkedList<CallPathValidator>> mthd2vlds;
 
-	public CallPaths(String callPathsFile) throws Exception {
+	public CallPathFile(String callPathsFile) throws Exception {
 		distanceFilePath = callPathsFile.replace("\\path\\", "\\distance\\");
 		if(!new File(distanceFilePath).exists()) {
 			throw new Exception("DistanceFile for "+callPathsFile+" is not found.");
@@ -78,7 +78,7 @@ public class CallPaths {
 	}
 	
 	public static void main(String[] args) throws Exception {
-		new CallPaths("D:\\ws_testcase\\distance_path\\path\\neu.lab+testcase.top+1.0@neu.lab+testcase.bottom@1.0.txt").validatePaths();
+		new CallPathFile("D:\\ws_testcase\\distance_path\\path\\neu.lab+testcase.top+1.0@neu.lab+testcase.bottom@1.0.txt").validatePaths();
 	}
 
 }

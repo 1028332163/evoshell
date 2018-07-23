@@ -3,6 +3,7 @@ package neu.lab.evoshell;
 import java.util.HashSet;
 import java.util.Set;
 
+
 /**
  * neu.lab.plug.testcase.homemade.host.H1.<init>(Lneu/lab/plug/testcase/homemade/a/A1;)V
  * 1.V 2.<> 3.return value 4.; 5.Lneu 6.I int 7./
@@ -121,6 +122,9 @@ public class MthdFormatUtil {
 		case "V":
 			stdCls = "void";
 			break;
+		case "B":
+			stdCls = "byte";
+			break;
 		case "Z":
 			stdCls = "boolean";
 			break;
@@ -218,6 +222,9 @@ public class MthdFormatUtil {
 		case "char":
 			evoCls = "C";
 			break;
+		case "byte":
+			evoCls = "B";
+			break;
 		case "short":
 			evoCls = "S";
 			break;
@@ -244,9 +251,58 @@ public class MthdFormatUtil {
 	}
 
 	public static void main(String[] args) {
+		// <com.fasterxml.jackson.core.JsonFactory: boolean requiresPropertyOrdering()>
+
+		// System.out.println(Util.soot2std("<com.fasterxml.jackson.core.JsonFactory:
+		// boolean requiresPropertyOrdering()>"));
+		// System.out.println(Util.std2evo("com.fasterxml.jackson.core.JsonFactory.requiresPropertyOrdering()boolean"));
+
+//		System.out.println(
+//				"neu.lab.testcase.middle.Mid.m2(int)void".equals(Util.evo2std("neu.lab.testcase.middle.Mid.m2(I)V")));
+//		System.out.println("neu.lab.testcase.middle.Mid.<init>(neu.lab.testcase.bottom.B)void"
+//				.equals(Util.evo2std("neu.lab.testcase.middle.Mid.<init>(Lneu/lab/testcase/bottom/B;)V")));
+//		System.out.println("neu.lab.testcase.top.Top.m2(java.lang.String,int)void"
+//				.equals(Util.evo2std("neu.lab.testcase.top.Top.m2(Ljava/lang/String;I)V")));
+//		System.out.println("neu.lab.testcase.top.Top.m(int,java.lang.String)void"
+//				.equals(Util.evo2std("neu.lab.testcase.top.Top.m(ILjava/lang/String;)V")));
+		
 		String evo = "neu.lab.testcase.top.ClassTop.m1(Ljava/lang/String;I)V";
 		String soot = "<neu.lab.testcase.top.ClassTop: void m1(java.lang.String,int)>";
 		System.out.println(soot2evo(soot));
+		testPrint(evo, soot);
+//		exeTest();
+	}
+	
+	private static void exeTest() {
+		// normal
+		String evo = "math.stat.descriptive.moment.ThirdMoment.copy"
+				+ "(Lmath/stat/descriptive/moment/ThirdMoment;Lmath/stat/descriptive/moment/ThirdMoment;)V";
+		String soot = "<math.stat.descriptive.moment.ThirdMoment: void copy"
+				+ "(math.stat.descriptive.moment.ThirdMoment,math.stat.descriptive.moment.ThirdMoment)>";
+		testPrint(evo, soot);
+		
+		// has object return
+				evo = "math.stat.descriptive.moment.GeometricMean.clear()Ljava/lang/Object;";
+				soot = "<math.stat.descriptive.moment.GeometricMean: java.lang.Object clear()>";
+				testPrint(evo, soot);
+		// no arg
+		evo = "math.stat.descriptive.moment.GeometricMean.clear()V";
+		soot = "<math.stat.descriptive.moment.GeometricMean: void clear()>";
+		testPrint(evo, soot);
+		// multiple base type ; single-dimension-array
+		evo = "math.stat.descriptive.moment.GeometricMean.evaluate([DII)D";
+		soot = "<math.stat.descriptive.moment.GeometricMean: double evaluate(double[],int,int)>";
+		testPrint(evo, soot);
+		// continuous-single-dimension-array
+		evo = "math.util.FastMath.splitMult([D[D[D)V";
+		soot = "<math.util.FastMath: void splitMult(double[],double[],double[])>";
+		testPrint(evo, soot);
+		// multiple-dimension-array
+		evo = "math.analysis.interpolation.TrivariateRealGridInterpolator.interpolate"
+				+ "([D[D[D[[[D)Lmath/analysis/TrivariateRealFunction;";
+		soot = "<math.analysis.interpolation.TrivariateRealGridInterpolator:"
+				+ " math.analysis.TrivariateRealFunction interpolate(double[],double[],double[],double[][][])>";
+		testPrint(evo, soot);
 	}
 
 	private static void testPrint(String evo, String soot) {

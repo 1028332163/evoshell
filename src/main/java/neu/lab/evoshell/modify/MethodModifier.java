@@ -89,9 +89,11 @@ public class MethodModifier {
 			}
 			if (insNode instanceof JumpInsnNode) {
 				ite.remove();
-			} else if (!remianPath.contains(currentLabel)) {
-				ite.remove();
-			}
+			} 
+//			//TODO remove else-body
+//			else if (!remianPath.contains(currentLabel)) {
+//				ite.remove();
+//			}
 
 		}
 	}
@@ -197,6 +199,9 @@ public class MethodModifier {
 	}
 
 	public static void main(String[] args) throws Exception {
+//		args = new String[3];
+//		args[0] = "<io.swagger.jaxrs.Reader: void readSwaggerConfig(java.lang.Class,io.swagger.annotations.SwaggerDefinition)>";
+//		args[1] = 
 		// String erM = "<neu.lab.testcase.top.MthdTop: void
 		// m1(java.lang.String,java.lang.Integer)>";
 		// String erJarPath ="D:\\cWS\\eclipse1\\testcase.top\\target\\classes";
