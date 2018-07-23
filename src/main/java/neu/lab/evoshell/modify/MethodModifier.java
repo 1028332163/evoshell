@@ -4,11 +4,15 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -22,6 +26,7 @@ import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.util.TraceClassVisitor;
 
 import neu.lab.evoshell.MthdFormatUtil;
 import neu.lab.evoshell.ShellConfig;
@@ -68,6 +73,20 @@ public class MethodModifier {
 		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(getOutFilePath()));
 		out.write(b);
 		out.close();
+		//TODO writeHalfByte
+//		writeModifiedByteCode();
+	}
+	
+	private void writeModifiedByteCode() {
+		try {
+			ClassReader cr = new ClassReader(new FileInputStream(getOutFilePath()));
+
+			PrintWriter p1 = new PrintWriter(new FileWriter("d:\\cWs\\notepad++\\out.txt", false));
+			cr.accept(new TraceClassVisitor(p1), ClassReader.SKIP_DEBUG);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
 	}
 
 	private String getOutFilePath() {
@@ -82,8 +101,10 @@ public class MethodModifier {
 	private void deleteBranch(MethodNode mn, ExeLabelPath remianPath) {
 		ListIterator<AbstractInsnNode> ite = mn.instructions.iterator();
 		LabelNode currentLabel = null;
+		Set<AbstractInsnNode> remainLabels = new HashSet<AbstractInsnNode>();
 		while (ite.hasNext()) {
 			AbstractInsnNode insNode = ite.next();
+			System.out.println(insNode+"->"+insNode.getNext());
 			if (insNode instanceof LabelNode) {
 				currentLabel = (LabelNode) insNode;
 			}
@@ -94,8 +115,20 @@ public class MethodModifier {
 //			else if (!remianPath.contains(currentLabel)) {
 //				ite.remove();
 //			}
-
+//			//TODO for debug
+//			else {
+//				remainLabels.add(insNode);
+//			}
 		}
+		System.out.println("======");
+//		//reset next.
+//		 ite = mn.instructions.iterator();
+//		 while (ite.hasNext()) {
+//				AbstractInsnNode insNode = ite.next();
+//				if(!remainLabels.contains(insNode.getNext())) {
+//					System.out.println(insNode+"->"+insNode.getNext());
+//				}
+//			}
 	}
 
 	/**
@@ -181,6 +214,10 @@ public class MethodModifier {
 		InputStream classInStream;
 		String erCls = MthdFormatUtil.sootMthd2cls(erM);
 		ZipFile zipFile = null;
+		File modifiedClass = new File(ShellConfig.modifyCp+erCls.replace(".", File.separator) + ".class");
+		if(modifiedClass.exists()) {//Other method in class was modified.
+			classInStream = new FileInputStream(modifiedClass);
+		}else
 		if (erJarPath.endsWith(".jar")) {
 			zipFile = new ZipFile(new File(erJarPath));
 			ZipEntry entry = zipFile.getEntry(erCls.replace(".", "/") + ".class");

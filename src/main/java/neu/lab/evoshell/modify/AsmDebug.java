@@ -24,21 +24,25 @@ import org.objectweb.asm.util.TraceClassVisitor;
 
 public class AsmDebug {
 
+	private static String class2modify = "D:\\cWS\\eclipse1\\plug.testcase.asm\\target\\classes\\neu\\lab\\plug\\testcase\\asm\\App.class";
+	private static String outClass = "D:\\cTestWs\\asmtest\\App.class";
+	private static String containMthd = "java.lang.Object.toString()Ljava/lang/String;";
+	private static String byteClass = "d:\\cWs\\notepad++\\out.txt";
+
 	public static void main(String[] args) throws Exception {
-//		modifyMthd();
+		 modifyMthd();
 		classTrace();
 	}
 
 	private static void modifyMthd() throws Exception {
-		ClassReader cr = new ClassReader(new FileInputStream(
-				"D:\\ws\\github_snapshot\\truth-release_0_41\\extensions\\liteproto\\target\\classes\\com\\google\\common\\truth\\extensions\\proto\\LiteProtoSubject.class"));
+		ClassReader cr = new ClassReader(new FileInputStream(class2modify));
 
 		ClassNode cn = new ClassNode();
 
 		cr.accept(cn, 0);
 		System.out.println(cn.name);
 		for (MethodNode mn : cn.methods) {
-//			System.out.println(cn.name.replace("/", ".") + "." + mn.name + mn.desc);
+			// System.out.println(cn.name.replace("/", ".") + "." + mn.name + mn.desc);
 			// debug(mn);
 			System.out.println("====");
 			// all path
@@ -46,7 +50,7 @@ public class AsmDebug {
 			Map<LabelNode, Integer> label2num = getLabel2num(mn);
 			System.out.println(paths.getPathsStr(label2num));
 			// remaining path
-			List<LabelNode> callLabels = getCallLabels(mn, "java.lang.Object.toString()Ljava/lang/String;");
+			List<LabelNode> callLabels = getCallLabels(mn,containMthd );
 			ExeLabelPath remianPath = paths.getRemainPath(callLabels);
 			// filter node
 			deleteBranch(mn, remianPath);
@@ -55,7 +59,7 @@ public class AsmDebug {
 		ClassWriter cw = new ClassWriter(0);
 		cn.accept(cw);
 		byte[] b = cw.toByteArray();
-		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream("D:\\cTestWs\\asmtest\\App.class"));
+		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(outClass));
 		out.write(b);
 		out.close();
 	}
@@ -174,9 +178,9 @@ public class AsmDebug {
 	}
 
 	private static void classTrace() throws Exception {
-		ClassReader cr = new ClassReader(new FileInputStream("D:\\ws\\github_snapshot\\truth-release_0_41\\extensions\\liteproto\\target\\classes\\com\\google\\common\\truth\\extensions\\proto\\LiteProtoSubject.class"));
+		ClassReader cr = new ClassReader(new FileInputStream(outClass));
 
-		PrintWriter p1 = new PrintWriter(new FileWriter("d:\\cWs\\notepad++\\out.txt", false));
+		PrintWriter p1 = new PrintWriter(new FileWriter(byteClass, false));
 		cr.accept(new TraceClassVisitor(p1), 0);
 	}
 }
