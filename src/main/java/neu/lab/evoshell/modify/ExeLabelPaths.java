@@ -54,6 +54,14 @@ public class ExeLabelPaths {
 		return sb.toString();
 	}
 	
+	public String getPathsStr() {
+		StringBuilder sb = new StringBuilder();
+		for (ExeLabelPath path : this.paths) {
+			sb.append(path.getPathStr() + "\n");
+		}
+		return sb.toString();
+	}
+	
 	/**
 	 * @param callLabels : LabelNodes whose statements call evoMthd.
 	 * @return path that occurs LabelNode in callLabels.

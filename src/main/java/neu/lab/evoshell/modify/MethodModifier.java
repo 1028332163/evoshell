@@ -24,10 +24,13 @@ import org.objectweb.asm.tree.AbstractInsnNode;
 import org.objectweb.asm.tree.ClassNode;
 import org.objectweb.asm.tree.JumpInsnNode;
 import org.objectweb.asm.tree.LabelNode;
+import org.objectweb.asm.tree.LineNumberNode;
 import org.objectweb.asm.tree.MethodInsnNode;
 import org.objectweb.asm.tree.MethodNode;
+import org.objectweb.asm.tree.TryCatchBlockNode;
 import org.objectweb.asm.util.TraceClassVisitor;
 
+import neu.lab.evoshell.FileUtil;
 import neu.lab.evoshell.MthdFormatUtil;
 import neu.lab.evoshell.ShellConfig;
 
@@ -46,44 +49,51 @@ public class MethodModifier {
 	}
 
 	public void modifyMthd() throws Exception {
+		// TODO writeHalfByte before modify.
+//		writeModifiedByteCode(getErClassStream(), "d:\\cWs\\notepad++\\ClassBefore.txt");
 
-		ClassNode classNode = readErClassNode();
+		ClassReader cr = new ClassReader(getErClassStream());
+		ClassNode classNode = new ClassNode();
+		cr.accept(classNode, 0);
+
 		String evoErM = MthdFormatUtil.soot2evo(erM);
 		boolean findMthd2modify = false;
 		for (MethodNode mn : classNode.methods) {
 			String evoMthd = classNode.name.replace("/", ".") + "." + mn.name + mn.desc;
 			if (evoErM.equals(evoMthd)) {
 				findMthd2modify = true;
-				
+
 				// filter node
 				deleteBranch(mn);
-				mn.tryCatchBlocks = null;
+				// mn.tryCatchBlocks = null;
 			}
 		}
 		if (!findMthd2modify) {
 			throw new Exception("can't find " + erM);
 		}
 
+		// TODO write result
 		ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES);
 		classNode.accept(cw);
 		byte[] b = cw.toByteArray();
 		BufferedOutputStream out = new BufferedOutputStream(new FileOutputStream(getOutFilePath()));
 		out.write(b);
 		out.close();
-		//TODO writeHalfByte
-//		writeModifiedByteCode();
+		// TODO writeHalfByte after modify.
+		// writeModifiedByteCode(new FileInputStream(getOutFilePath()),
+		// "d:\\cWs\\notepad++\\ClassAfter.txt");
 	}
-	
-	private void writeModifiedByteCode() {
-		try {
-			ClassReader cr = new ClassReader(new FileInputStream(getOutFilePath()));
 
-			PrintWriter p1 = new PrintWriter(new FileWriter("d:\\cWs\\notepad++\\out.txt", false));
+	private void writeModifiedByteCode(InputStream inClass, String outPath) {
+		try {
+			ClassReader cr = new ClassReader(inClass);
+
+			PrintWriter p1 = new PrintWriter(new FileWriter(outPath, false));
 			cr.accept(new TraceClassVisitor(p1), ClassReader.SKIP_DEBUG);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		
+
 	}
 
 	private String getOutFilePath() {
@@ -97,38 +107,45 @@ public class MethodModifier {
 
 	private void deleteBranch(MethodNode mn) throws Exception {
 		// TODO remaining path
-//		ExeLabelPath remianPath = getAllExePath(mn).getRemainPath(getCallLabels(mn, MthdFormatUtil.soot2evo(eeM)));
-		
+		// ExeLabelPaths allPath = getAllExePath(mn);
+		// System.out.println(allPath.getPathsStr());
+		// List<LabelNode> callLabels = getCallLabels(mn, MthdFormatUtil.soot2evo(eeM));
+		// for (LabelNode label : callLabels) {
+		// System.out.println("callLabel:" + label);
+		// }
+		// ExeLabelPath remianPath = allPath.getRemainPath(callLabels);
+
+		List<LabelNode> catchEndLabels = new ArrayList<LabelNode>();
+		for (TryCatchBlockNode tryCatch : mn.tryCatchBlocks) {
+			catchEndLabels.add(tryCatch.end);
+
+		}
+
 		ListIterator<AbstractInsnNode> ite = mn.instructions.iterator();
 		LabelNode currentLabel = null;
-		Set<AbstractInsnNode> remainLabels = new HashSet<AbstractInsnNode>();
 		while (ite.hasNext()) {
 			AbstractInsnNode insNode = ite.next();
-			System.out.println(insNode+"->"+insNode.getNext());
+			// System.out.println(insNode);
 			if (insNode instanceof LabelNode) {
 				currentLabel = (LabelNode) insNode;
 			}
-			if (insNode instanceof JumpInsnNode) {
-				ite.remove();
-			} 
-//			//TODO remove else-body
-//			else if (!remianPath.contains(currentLabel)) {
-//				ite.remove();
-//			}
-//			//TODO for debug
-//			else {
-//				remainLabels.add(insNode);
-//			}
+			if (insNode instanceof JumpInsnNode && !catchEndLabels.contains(currentLabel)) {
+				JumpInsnNode jumpNode = ((JumpInsnNode) insNode);
+				if (jumpNode.getOpcode() == Opcodes.GOTO) {
+					ite.remove();
+				}
+					
+			}
+			if (insNode instanceof LineNumberNode) {
+				// System.out.println(((LineNumberNode)insNode).line);
+			}
+			// //TODO remove else-body
+			// else if (!remianPath.contains(currentLabel)) {
+			// ite.remove();
+			// }
+
 		}
 		System.out.println("======");
-//		//reset next.
-//		 ite = mn.instructions.iterator();
-//		 while (ite.hasNext()) {
-//				AbstractInsnNode insNode = ite.next();
-//				if(!remainLabels.contains(insNode.getNext())) {
-//					System.out.println(insNode+"->"+insNode.getNext());
-//				}
-//			}
 	}
 
 	/**
@@ -187,6 +204,7 @@ public class MethodModifier {
 		LabelNode lastLabel = null;
 		while (ite.hasNext()) {
 			AbstractInsnNode insNode = ite.next();
+			// System.out.println(insNode);
 			if (insNode instanceof LabelNode) {// add sequence node.
 				if (!hasAddFirst) {// first labelNode
 					paths.addFirstNode((LabelNode) insNode);
@@ -210,15 +228,14 @@ public class MethodModifier {
 		return paths;
 	}
 
-	private ClassNode readErClassNode() throws ZipException, IOException {
+	private InputStream getErClassStream() throws ZipException, IOException {
 		InputStream classInStream;
 		String erCls = MthdFormatUtil.sootMthd2cls(erM);
 		ZipFile zipFile = null;
-		File modifiedClass = new File(ShellConfig.modifyCp+erCls.replace(".", File.separator) + ".class");
-		if(modifiedClass.exists()) {//Other method in class was modified.
+		File modifiedClass = new File(ShellConfig.modifyCp + erCls.replace(".", File.separator) + ".class");
+		if (modifiedClass.exists()) {// Other method in class was modified.
 			classInStream = new FileInputStream(modifiedClass);
-		}else
-		if (erJarPath.endsWith(".jar")) {
+		} else if (erJarPath.endsWith(".jar")) {
 			zipFile = new ZipFile(new File(erJarPath));
 			ZipEntry entry = zipFile.getEntry(erCls.replace(".", "/") + ".class");
 			classInStream = zipFile.getInputStream(entry);
@@ -226,26 +243,24 @@ public class MethodModifier {
 			classInStream = new FileInputStream(
 					erJarPath + File.separator + erCls.replace(".", File.separator) + ".class");
 		}
-		ClassReader cr = new ClassReader(classInStream);
-		ClassNode cn = new ClassNode();
-		cr.accept(cn, 0);
-		if (zipFile != null) {
-			zipFile.close();
-		}
-		return cn;
+		return classInStream;
 	}
 
 	public static void main(String[] args) throws Exception {
-//		args = new String[3];
-//		args[0] = "<io.swagger.jaxrs.Reader: void readSwaggerConfig(java.lang.Class,io.swagger.annotations.SwaggerDefinition)>";
-//		args[1] = 
-		// String erM = "<neu.lab.testcase.top.MthdTop: void
-		// m1(java.lang.String,java.lang.Integer)>";
-		// String erJarPath ="D:\\cWS\\eclipse1\\testcase.top\\target\\classes";
-		// String eeM = "<neu.lab.testcase.middle.MthdMiddle: void m1(int)>";
-		System.out.println("erM:" + args[0]);
-		System.out.println("eeM:" + args[2]);
-		System.out.println("jarPath:" + args[1]);
-		new MethodModifier(args[0], args[1], args[2]).modifyMthd();
+
+		 System.out.println("erM:" + args[0]);
+		 System.out.println("eeM:" + args[2]);
+		 System.out.println("jarPath:" + args[1]);
+		 new MethodModifier(args[0], args[1], args[2]).modifyMthd();
+
+		// TODO test
+//		asmTest();
+	}
+
+	private static void asmTest() throws Exception {
+		FileUtil.delFolder(ShellConfig.modifyCp);
+		new MethodModifier("<neu.lab.plug.testcase.asm.App: void <init>()>",
+				"D:\\cWS\\eclipse1\\plug.testcase.asm\\target\\classes",
+				"<java.lang.Object: java.lang.String toString()>").modifyMthd();
 	}
 }

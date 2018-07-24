@@ -41,13 +41,7 @@ public class ExeLabelPath {
 		return clone;
 	}
 
-	public String getPathStr(Map<LabelNode, Integer> label2num) {
-		StringBuilder sb = new StringBuilder();
-		for (LabelNode node : this.nodes) {
-			sb.append(label2num.get(node) + "->");
-		}
-		return sb.toString();
-	}
+
 
 	private int getLabelPos(LabelNode labelNode) {
 		int pos = -1;
@@ -71,5 +65,19 @@ public class ExeLabelPath {
 			}
 		}
 		return pos;
+	}
+	public String getPathStr(Map<LabelNode, Integer> label2num) {
+		StringBuilder sb = new StringBuilder();
+		for (LabelNode node : this.nodes) {
+			sb.append(label2num.get(node) + "->");
+		}
+		return sb.toString();
+	}
+	public String getPathStr() {
+		StringBuilder sb = new StringBuilder();
+		for (LabelNode node : this.nodes) {
+			sb.append(node + "->\n");
+		}
+		return sb.toString();
 	}
 }

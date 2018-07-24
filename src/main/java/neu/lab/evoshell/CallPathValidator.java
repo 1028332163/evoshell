@@ -7,13 +7,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
-import org.apache.commons.exec.CommandLine;
-import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteException;
 
 import neu.lab.evoshell.modify.MethodModifier;
@@ -60,7 +56,7 @@ public class CallPathValidator {
 				+ " -Dmodify_cp=D:\\ws_testcase\\modifyCp -Dclass=" + entryClass
 				+ " -Dcriterion=MTHD_PROB_RISK -Drisk_method=\"" + riskMthd + "\" -Dmthd_prob_distance_file="
 				+ distanceFile + " -Dmaven.test.skip=true -e";
-		exeCmd(evoCmd);
+		ExecUtil.exeCmd(evoCmd);
 	}
 
 	private void modifyMthdOnPath() throws Exception {
@@ -69,7 +65,7 @@ public class CallPathValidator {
 			String cmd = "java -cp " + classPath + " neu.lab.evoshell.modify.MethodModifier \"" + mthds[i] + "\" \""
 					+ jarPaths[i] + "\" \"" + mthds[i + 1] + "\"";
 			modifyMthdCmds.add(cmd);
-			exeCmd(cmd);
+			ExecUtil.exeCmd(cmd);
 		}
 	}
 
@@ -146,15 +142,6 @@ public class CallPathValidator {
 
 		cmpResult(resultFlag, resultException);
 		System.out.println();
-	}
-
-	public static void exeCmd(String mvnCmd) throws ExecuteException, IOException {
-		System.out.println("----execute cmd:" + mvnCmd);
-		 SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		 System.out.println("start time：" + sdf.format(new Date()));
-		 CommandLine cmdLine = CommandLine.parse(mvnCmd);
-		 DefaultExecutor executor = new DefaultExecutor();
-		 executor.execute(cmdLine);
 	}
 
 	public static void main(String[] args) throws Exception {
