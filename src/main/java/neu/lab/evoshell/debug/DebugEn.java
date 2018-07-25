@@ -1,4 +1,4 @@
-package neu.lab.evoshell.modify;
+package neu.lab.evoshell.debug;
 
 import java.io.IOException;
 
@@ -15,6 +15,12 @@ public class DebugEn {
 				+ "neu.lab.evoshell.debug.LoadClassEn"
 				+ "";
 		System.out.println(cmd);
+		{
+			int j =1;
+		}
+		{
+			int j = 1;
+		}
 //		ExecUtil.exeCmd(cmd);
 	}
 	

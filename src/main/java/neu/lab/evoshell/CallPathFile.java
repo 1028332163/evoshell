@@ -11,7 +11,10 @@ import java.util.Map;
 
 public class CallPathFile {
 
+	//TODO debug
 	private static int exePath4riskMthd = 2;//callPath handled for per riskMethod.
+	private static String riskMethod4debug =null;
+	
 	private String classPath;
 	private String pomPath;//D:\cWS\eclipse1\testcase.top
 	private String distanceFilePath;
@@ -72,13 +75,14 @@ public class CallPathFile {
 			mthd2vlds.put(riskMthd, validators);
 		}
 		if(validators.size()<exePath4riskMthd&&validator.mthds.length>1) {
+			if(riskMethod4debug==null||riskMthd.equals(riskMethod4debug))
 			mthdSeq.add(riskMthd);
 			validators.add(validator);
 		}
 	}
 	
 	public static void main(String[] args) throws Exception {
-		new CallPathFile("D:\\ws_testcase\\distance_path\\path\\neu.lab+testcase.top+1.0@neu.lab+testcase.bottom@1.0.txt").validatePaths();
+		new CallPathFile("D:\\ws_testcase\\distance_path_debug\\path\\com.alibaba+dubbo-rpc-thrift+2.6.2@org.apache.httpcomponents+httpcore@4.4.6.txt").validatePaths();
 	}
 
 }

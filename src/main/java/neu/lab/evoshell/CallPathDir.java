@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 
 public class CallPathDir {
+	//TODO validate 标号；统计riskMethod个数
 	public static void main(String[] args) throws IOException {
 		FileSyn fileSyn = new FileSyn("D:\\ws_testcase\\image\\syn_modifyEvo.txt");
 		File reachedResult = new File(ShellConfig.cmpResult);
